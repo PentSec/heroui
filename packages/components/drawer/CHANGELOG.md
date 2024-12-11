@@ -1,5 +1,13 @@
 # @nextui-org/drawer
 
+## 2.2.6
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @nextui-org/modal@2.2.6
+  - @nextui-org/framer-utils@2.1.5
+
 ## 2.2.5
 
 ### Patch Changes

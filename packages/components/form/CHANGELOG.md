@@ -1,5 +1,12 @@
 # @nextui-org/form
 
+## 2.1.7
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @nextui-org/system@2.4.5
+
 ## 2.1.6
 
 ### Patch Changes

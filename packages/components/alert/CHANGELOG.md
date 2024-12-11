@@ -1,5 +1,12 @@
 # @nextui-org/alert
 
+## 2.2.8
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @nextui-org/button@2.2.8
+
 ## 2.2.7
 
 ### Patch Changes

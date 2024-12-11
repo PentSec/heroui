@@ -1,5 +1,12 @@
 # @nextui-org/radio
 
+## 2.3.7
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @nextui-org/form@2.1.7
+
 ## 2.3.6
 
 ### Patch Changes

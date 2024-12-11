@@ -1,5 +1,12 @@
 # @nextui-org/input-otp
 
+## 2.1.7
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @nextui-org/form@2.1.7
+
 ## 2.1.6
 
 ### Patch Changes

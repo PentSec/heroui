@@ -1,5 +1,14 @@
 # @nextui-org/popover
 
+## 2.3.8
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @nextui-org/button@2.2.8
+  - @nextui-org/aria-utils@2.2.6
+  - @nextui-org/framer-utils@2.1.5
+
 ## 2.3.7
 
 ### Patch Changes

@@ -45,8 +45,6 @@ export default {
   },
 } as Meta<typeof RangeCalendar>;
 
-delete calendar.defaultVariants?.showMonthAndYearPickers;
-
 const defaultProps = {
   ...calendar.defaultVariants,
   visibleMonths: 1,
@@ -60,7 +58,7 @@ const ControlledTemplate = (args: RangeCalendarProps) => {
     end: today(getLocalTimeZone()).add({weeks: 1}),
   };
 
-  let [value, setValue] = React.useState<RangeValue<DateValue>>(defaultValue);
+  let [value, setValue] = React.useState<RangeValue<DateValue> | null>(defaultValue);
 
   return (
     <div className="flex flex-wrap gap-4">
@@ -143,7 +141,7 @@ const ControlledFocusedValueTemplate = (args: RangeCalendarProps) => {
 };
 
 const InvalidDatesTemplate = (args: RangeCalendarProps) => {
-  let [date, setDate] = React.useState<RangeValue<DateValue>>({
+  let [date, setDate] = React.useState<RangeValue<DateValue> | null>({
     start: today(getLocalTimeZone()),
     end: today(getLocalTimeZone()).add({weeks: 1}),
   });
@@ -174,12 +172,12 @@ const InternationalCalendarsTemplate = (args: RangeCalendarProps) => {
 };
 
 const PresetsTemplate = (args: RangeCalendarProps) => {
-  let [value, setValue] = React.useState<RangeValue<DateValue>>({
+  let [value, setValue] = React.useState<RangeValue<DateValue> | null>({
     start: today(getLocalTimeZone()),
     end: today(getLocalTimeZone()).add({weeks: 1, days: 3}),
   });
 
-  let [focusedValue, setFocusedValue] = React.useState<DateValue>(today(getLocalTimeZone()));
+  let [focusedValue, setFocusedValue] = React.useState<DateValue | null>(today(getLocalTimeZone()));
 
   let {locale} = useLocale();
 
@@ -375,6 +373,14 @@ export const InvalidDates = {
   render: InvalidDatesTemplate,
   args: {
     ...defaultProps,
+  },
+};
+
+export const WithMonthAndYearPickers = {
+  render: Template,
+  args: {
+    ...defaultProps,
+    showMonthAndYearPickers: true,
   },
 };
 

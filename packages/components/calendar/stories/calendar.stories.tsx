@@ -13,6 +13,7 @@ import {I18nProvider, useLocale} from "@react-aria/i18n";
 import {Button, ButtonGroup} from "@nextui-org/button";
 import {Radio, RadioGroup} from "@nextui-org/radio";
 import {cn} from "@nextui-org/theme";
+import {NextUIProvider} from "@nextui-org/system";
 
 import {Calendar, CalendarProps, DateValue} from "../src";
 
@@ -38,6 +39,11 @@ export default {
       },
       options: ["narrow", "short", "long"],
     },
+    disableAnimation: {
+      control: {
+        type: "boolean",
+      },
+    },
   },
 } as Meta<typeof Calendar>;
 
@@ -49,7 +55,7 @@ const defaultProps = {
 const Template = (args: CalendarProps) => <Calendar {...args} />;
 
 const ControlledTemplate = (args: CalendarProps) => {
-  let [value, setValue] = React.useState<DateValue>(parseDate("2024-03-07"));
+  let [value, setValue] = React.useState<DateValue | null>(parseDate("2024-03-07"));
 
   return (
     <div className="flex flex-wrap gap-4">
@@ -104,7 +110,7 @@ const UnavailableDatesTemplate = (args: CalendarProps) => {
 
 const ControlledFocusedValueTemplate = (args: CalendarProps) => {
   let defaultDate = today(getLocalTimeZone());
-  let [focusedDate, setFocusedDate] = React.useState<DateValue>(defaultDate);
+  let [focusedDate, setFocusedDate] = React.useState<DateValue | null>(defaultDate);
 
   return (
     <div className="flex flex-col gap-4">
@@ -127,7 +133,7 @@ const ControlledFocusedValueTemplate = (args: CalendarProps) => {
 };
 
 const InvalidDateTemplate = (args: CalendarProps) => {
-  let [date, setDate] = React.useState<DateValue>(today(getLocalTimeZone()));
+  let [date, setDate] = React.useState<DateValue | null>(today(getLocalTimeZone()));
   let {locale} = useLocale();
   let isInvalid = isWeekend(date, locale);
 
@@ -155,7 +161,7 @@ const InternationalCalendarsTemplate = (args: CalendarProps) => {
 
 const PresetsTemplate = (args: CalendarProps) => {
   let defaultDate = today(getLocalTimeZone());
-  let [value, setValue] = React.useState<DateValue>(defaultDate);
+  let [value, setValue] = React.useState<DateValue | null>(defaultDate);
   let {locale} = useLocale();
 
   let now = today(getLocalTimeZone());
@@ -241,7 +247,6 @@ const CalendarWidthTemplate = (args: CalendarProps) => {
   return (
     <div className="flex gap-4">
       <div className="flex flex-col items-center gap-4">
-        <p>calendarWidth: 300</p>
         <p className="text-small text-default-600">calendarWidth: 300</p>
         <Calendar {...args} calendarWidth={300} />
       </div>
@@ -252,6 +257,31 @@ const CalendarWidthTemplate = (args: CalendarProps) => {
       <div className="flex flex-col items-center gap-4">
         <p className="text-small text-default-600">calendarWidth: 30em</p>
         <Calendar {...args} calendarWidth="30em" />
+      </div>
+    </div>
+  );
+};
+
+const ReducedMotionTemplate = (args: CalendarProps) => {
+  return (
+    <div className="flex gap-4">
+      <div className="flex flex-col items-center gap-4">
+        <p className="text-small text-default-600">reducedMotion: never</p>
+        <NextUIProvider reducedMotion="never">
+          <Calendar {...args} />
+        </NextUIProvider>
+      </div>
+      <div className="flex flex-col items-center gap-4">
+        <p className="text-small text-default-600">reducedMotion: always</p>
+        <NextUIProvider reducedMotion="always">
+          <Calendar {...args} />
+        </NextUIProvider>
+      </div>
+      <div className="flex flex-col items-center gap-4">
+        <p className="text-small text-default-600">reducedMotion: user</p>
+        <NextUIProvider reducedMotion="user">
+          <Calendar {...args} />
+        </NextUIProvider>
       </div>
     </div>
   );
@@ -371,6 +401,13 @@ export const Presets = {
 
 export const CalendarWidth = {
   render: CalendarWidthTemplate,
+  args: {
+    ...defaultProps,
+  },
+};
+
+export const ReducedMotion = {
+  render: ReducedMotionTemplate,
   args: {
     ...defaultProps,
   },

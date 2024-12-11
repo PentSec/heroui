@@ -1,4 +1,5 @@
 import type {ListboxItemBaseProps} from "./base/listbox-item-base";
+import type {MenuItemVariantProps} from "@nextui-org/theme";
 
 import {useMemo, useRef, useCallback} from "react";
 import {listboxItem} from "@nextui-org/theme";
@@ -11,7 +12,7 @@ import {
 import {useFocusRing} from "@react-aria/focus";
 import {Node} from "@react-types/shared";
 import {filterDOMProps} from "@nextui-org/react-utils";
-import {clsx, dataAttr, objectToDeps, removeEvents} from "@nextui-org/shared-utils";
+import {clsx, dataAttr, objectToDeps, removeEvents, warn} from "@nextui-org/shared-utils";
 import {useOption} from "@react-aria/listbox";
 import {mergeProps} from "@react-aria/utils";
 import {useHover, usePress} from "@react-aria/interactions";
@@ -24,7 +25,8 @@ interface Props<T extends object> extends ListboxItemBaseProps<T> {
 }
 
 export type UseListboxItemProps<T extends object> = Props<T> &
-  Omit<HTMLNextUIProps<"li">, keyof Props<T>>;
+  Omit<HTMLNextUIProps<"li">, keyof Props<T>> &
+  MenuItemVariantProps;
 
 export function useListboxItem<T extends object>(originalProps: UseListboxItemProps<T>) {
   const globalContext = useProviderContext();
@@ -44,7 +46,7 @@ export function useListboxItem<T extends object>(originalProps: UseListboxItemPr
     classNames,
     autoFocus,
     onPress,
-    onClick,
+    onClick: deprecatedOnClick,
     shouldHighlightOnFocus,
     hideSelectedIcon = false,
     isReadOnly = false,
@@ -65,6 +67,13 @@ export function useListboxItem<T extends object>(originalProps: UseListboxItemPr
   const isSelectable = state.selectionManager.selectionMode !== "none";
 
   const isMobile = useIsMobile();
+
+  if (deprecatedOnClick && typeof deprecatedOnClick === "function") {
+    warn(
+      "onClick is deprecated, please use onPress instead. See: https://github.com/nextui-org/nextui/issues/4292",
+      "ListboxItem",
+    );
+  }
 
   const {pressProps, isPressed} = usePress({
     ref: domRef,
@@ -99,8 +108,10 @@ export function useListboxItem<T extends object>(originalProps: UseListboxItemPr
         ...variantProps,
         isDisabled,
         disableAnimation,
+        hasTitleTextChild: typeof rendered === "string",
+        hasDescriptionTextChild: typeof description === "string",
       }),
-    [objectToDeps(variantProps), isDisabled, disableAnimation],
+    [objectToDeps(variantProps), isDisabled, disableAnimation, rendered, description],
   );
 
   const baseStyles = clsx(classNames?.base, className);
@@ -116,7 +127,9 @@ export function useListboxItem<T extends object>(originalProps: UseListboxItemPr
   const getItemProps: PropGetter = (props = {}) => ({
     ref: domRef,
     ...mergeProps(
-      {onClick},
+      {
+        onClick: deprecatedOnClick,
+      },
       itemProps,
       isReadOnly ? {} : mergeProps(focusProps, pressProps),
       hoverProps,

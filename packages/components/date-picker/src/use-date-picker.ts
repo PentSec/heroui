@@ -1,5 +1,5 @@
 import type {DateValue} from "@internationalized/date";
-import type {DateInputProps, TimeInputProps} from "@nextui-org/date-input";
+import type {DateInputProps} from "@nextui-org/date-input";
 import type {DatePickerState} from "@react-stately/datepicker";
 import type {ButtonProps} from "@nextui-org/button";
 import type {CalendarProps} from "@nextui-org/calendar";
@@ -15,6 +15,7 @@ import {useDatePickerState} from "@react-stately/datepicker";
 import {AriaDatePickerProps, useDatePicker as useAriaDatePicker} from "@react-aria/datepicker";
 import {clsx, dataAttr, objectToDeps} from "@nextui-org/shared-utils";
 import {mergeProps} from "@react-aria/utils";
+import {FormContext, useSlottedContext} from "@nextui-org/form";
 import {ariaShouldCloseOnInteractOutside} from "@nextui-org/aria-utils";
 
 import {useDatePickerBase} from "./use-date-picker-base";
@@ -63,12 +64,17 @@ export function useDatePicker<T extends DateValue>({
   ...originalProps
 }: UseDatePickerProps<T>) {
   const globalContext = useProviderContext();
+  const {validationBehavior: formValidationBehavior} = useSlottedContext(FormContext) || {};
 
   const validationBehavior =
-    originalProps.validationBehavior ?? globalContext?.validationBehavior ?? "aria";
+    originalProps.validationBehavior ??
+    formValidationBehavior ??
+    globalContext?.validationBehavior ??
+    "native";
 
   const {
     domRef,
+    startContent,
     endContent,
     selectorIcon,
     createCalendar,
@@ -157,7 +163,7 @@ export function useDatePicker<T extends DateValue>({
     } as DateInputProps;
   };
 
-  const getTimeInputProps = (): TimeInputProps => {
+  const getTimeInputProps = () => {
     if (!showTimeField) return {};
 
     return {
@@ -231,6 +237,7 @@ export function useDatePicker<T extends DateValue>({
 
   return {
     state,
+    startContent,
     endContent,
     selectorIcon,
     showTimeField,

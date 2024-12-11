@@ -3,7 +3,7 @@ import type {HTMLNextUIProps, PropGetter, SharedSelection} from "@nextui-org/sys
 import {useProviderContext} from "@nextui-org/system";
 import {AriaMenuProps} from "@react-types/menu";
 import {AriaMenuOptions} from "@react-aria/menu";
-import {useAriaMenu} from "@nextui-org/use-aria-menu";
+import {useMenu as useAriaMenu} from "@react-aria/menu";
 import {menu, MenuVariantProps, SlotsToClasses, MenuSlots} from "@nextui-org/theme";
 import {TreeState, useTreeState} from "@react-stately/tree";
 import {ReactRef, filterDOMProps, useDOMRef} from "@nextui-org/react-utils";
@@ -129,7 +129,7 @@ export function useMenu<T extends object>(props: UseMenuProps<T>) {
 
   const state = propState || innerState;
 
-  const {menuProps} = useAriaMenu({...otherProps, ...userMenuProps}, state, domRef);
+  const {menuProps} = useAriaMenu({...otherProps, ...userMenuProps, onAction}, state, domRef);
 
   const slots = useMemo(() => menu({className}), [className]);
   const baseStyles = clsx(classNames?.base, className);
@@ -169,7 +169,6 @@ export function useMenu<T extends object>(props: UseMenuProps<T>) {
     variant,
     color,
     disableAnimation,
-    onAction,
     onClose,
     topContent,
     bottomContent,

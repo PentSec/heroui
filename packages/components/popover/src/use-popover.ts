@@ -6,7 +6,7 @@ import {RefObject, Ref, useEffect} from "react";
 import {ReactRef, useDOMRef} from "@nextui-org/react-utils";
 import {OverlayTriggerState, useOverlayTriggerState} from "@react-stately/overlays";
 import {useFocusRing} from "@react-aria/focus";
-import {ariaHideOutside, useOverlayTrigger} from "@react-aria/overlays";
+import {ariaHideOutside, useOverlayTrigger, usePreventScroll} from "@react-aria/overlays";
 import {OverlayTriggerProps} from "@react-types/overlays";
 import {
   HTMLNextUIProps,
@@ -118,6 +118,7 @@ export function usePopover(originalProps: UsePopoverProps) {
     boundaryElement,
     isKeyboardDismissDisabled,
     shouldCloseOnInteractOutside,
+    shouldCloseOnScroll,
     motionProps,
     className,
     classNames,
@@ -169,6 +170,7 @@ export function usePopover(originalProps: UsePopoverProps) {
       containerPadding,
       updatePositionDeps,
       isKeyboardDismissDisabled,
+      shouldCloseOnScroll,
       shouldCloseOnInteractOutside,
     },
     state,
@@ -188,6 +190,10 @@ export function usePopover(originalProps: UsePopoverProps) {
 
   const baseStyles = clsx(classNames?.base, className);
 
+  usePreventScroll({
+    isDisabled: !(shouldBlockScroll && state.isOpen),
+  });
+
   const getPopoverProps: PropGetter = (props = {}) => ({
     ref: domRef,
     ...mergeProps(popoverProps, otherProps, props),
@@ -202,7 +208,7 @@ export function usePopover(originalProps: UsePopoverProps) {
     "data-focus": dataAttr(isFocused),
     "data-arrow": dataAttr(showArrow),
     "data-focus-visible": dataAttr(isFocusVisible),
-    "data-placement": getArrowPlacement(ariaPlacement, placementProp),
+    "data-placement": getArrowPlacement(ariaPlacement || "top", placementProp),
     ...mergeProps(focusProps, dialogPropsProp, props),
     className: slots.base({class: clsx(baseStyles)}),
     style: {
@@ -216,7 +222,7 @@ export function usePopover(originalProps: UsePopoverProps) {
       "data-slot": "content",
       "data-open": dataAttr(state.isOpen),
       "data-arrow": dataAttr(showArrow),
-      "data-placement": getArrowPlacement(ariaPlacement, placementProp),
+      "data-placement": getArrowPlacement(ariaPlacement || "top", placementProp),
       className: slots.content({class: clsx(classNames?.content, props.className)}),
     }),
     [slots, state.isOpen, showArrow, ariaPlacement, placementProp, classNames],
@@ -224,7 +230,7 @@ export function usePopover(originalProps: UsePopoverProps) {
 
   const placement = useMemo(
     () =>
-      getShouldUseAxisPlacement(ariaPlacement, placementProp)
+      getShouldUseAxisPlacement(ariaPlacement || "top", placementProp)
         ? ariaPlacement || placementProp
         : placementProp,
     [ariaPlacement, placementProp],

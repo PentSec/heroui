@@ -4,10 +4,10 @@ import type {AriaButtonProps} from "@nextui-org/use-aria-button";
 import type {RippleProps} from "@nextui-org/ripple";
 
 import {card} from "@nextui-org/theme";
-import {MouseEvent, ReactNode, useCallback, useMemo} from "react";
+import {MouseEventHandler, ReactNode, useCallback, useMemo} from "react";
 import {chain, mergeProps} from "@react-aria/utils";
 import {useFocusRing} from "@react-aria/focus";
-import {useHover} from "@react-aria/interactions";
+import {PressEvent, useHover} from "@react-aria/interactions";
 import {useAriaButton} from "@nextui-org/use-aria-button";
 import {
   HTMLNextUIProps,
@@ -20,7 +20,7 @@ import {ReactRef, filterDOMProps} from "@nextui-org/react-utils";
 import {useDOMRef} from "@nextui-org/react-utils";
 import {useRipple} from "@nextui-org/ripple";
 
-export interface Props extends HTMLNextUIProps<"div"> {
+export interface Props extends Omit<HTMLNextUIProps<"div">, "onClick"> {
   /**
    * Ref to the DOM node.
    */
@@ -34,12 +34,17 @@ export interface Props extends HTMLNextUIProps<"div"> {
    * @default false
    */
   disableRipple?: boolean;
-
   /**
    * Whether the card should allow text selection on press. (only for pressable cards)
    * @default true
    */
   allowTextSelectionOnPress?: boolean;
+  /**
+   * The native button click event handler.
+   * use `onPress` instead.
+   * @deprecated
+   */
+  onClick?: MouseEventHandler<HTMLButtonElement>;
   /**
    * Classname or List of classes to change the classNames of the element.
    * if `className` is passed, it will be added to the base slot.
@@ -96,20 +101,22 @@ export function useCard(originalProps: UseCardProps) {
 
   const baseStyles = clsx(classNames?.base, className);
 
-  const {onClick: onRippleClickHandler, onClear: onClearRipple, ripples} = useRipple();
+  const {onClear: onClearRipple, onPress: onRipplePressHandler, ripples} = useRipple();
 
-  const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-    if (!disableAnimation && !disableRipple && domRef.current) {
-      onRippleClickHandler(e);
-    }
-  };
+  const handlePress = useCallback(
+    (e: PressEvent) => {
+      if (disableRipple || disableAnimation) return;
+      domRef.current && onRipplePressHandler(e);
+    },
+    [disableRipple, disableAnimation, domRef, onRipplePressHandler],
+  );
 
   const {buttonProps, isPressed} = useAriaButton(
     {
-      onPress,
+      onPress: chain(onPress, handlePress),
       elementType: as,
       isDisabled: !originalProps.isPressable,
-      onClick: chain(onClick, handleClick),
+      onClick: onClick,
       allowTextSelectionOnPress,
       ...otherProps,
     } as unknown as AriaButtonProps<"button">,
@@ -209,7 +216,7 @@ export function useCard(originalProps: UseCardProps) {
     isPressable: originalProps.isPressable,
     isHoverable: originalProps.isHoverable,
     disableRipple,
-    handleClick,
+    handlePress,
     isFocusVisible,
     getCardProps,
     getRippleProps,

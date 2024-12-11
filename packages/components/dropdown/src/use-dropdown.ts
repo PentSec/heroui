@@ -9,11 +9,12 @@ import {useMenuTrigger} from "@react-aria/menu";
 import {dropdown} from "@nextui-org/theme";
 import {clsx} from "@nextui-org/shared-utils";
 import {ReactRef, mergeRefs} from "@nextui-org/react-utils";
-import {ariaShouldCloseOnInteractOutside} from "@nextui-org/aria-utils";
+import {ariaShouldCloseOnInteractOutside, toReactAriaPlacement} from "@nextui-org/aria-utils";
 import {useMemo, useRef} from "react";
 import {mergeProps} from "@react-aria/utils";
 import {MenuProps} from "@nextui-org/menu";
 import {CollectionElement} from "@react-types/shared";
+import {useOverlayPosition} from "@react-aria/overlays";
 
 interface Props extends HTMLNextUIProps<"div"> {
   /**
@@ -51,7 +52,7 @@ const getMenuItem = <T extends object>(props: Partial<MenuProps<T>> | undefined,
 
     if (mergedChildren && mergedChildren.length) {
       const item = ((mergedChildren as CollectionElement<T>[]).find((item) => {
-        if (item.key === key) {
+        if (item && item.key === key) {
           return item;
         }
       }) || {}) as {props: MenuProps};
@@ -77,7 +78,9 @@ const getCloseOnSelect = <T extends object>(
   return props?.closeOnSelect;
 };
 
-export function useDropdown(props: UseDropdownProps) {
+const DEFAULT_PLACEMENT = "bottom";
+
+export function useDropdown(props: UseDropdownProps): UseDropdownReturn {
   const globalContext = useProviderContext();
 
   const {
@@ -89,13 +92,17 @@ export function useDropdown(props: UseDropdownProps) {
     isDisabled,
     type = "menu",
     trigger = "press",
-    placement = "bottom",
+    placement: placementProp = DEFAULT_PLACEMENT,
     closeOnSelect = true,
     shouldBlockScroll = true,
     classNames: classNamesProp,
     disableAnimation = globalContext?.disableAnimation ?? false,
     onClose,
     className,
+    containerPadding = 12,
+    offset = 7,
+    crossOffset = 0,
+    shouldFlip = true,
     ...otherProps
   } = props;
 
@@ -132,6 +139,17 @@ export function useDropdown(props: UseDropdownProps) {
     [className],
   );
 
+  const {placement} = useOverlayPosition({
+    isOpen: state.isOpen,
+    targetRef: triggerRef,
+    overlayRef: popoverRef,
+    placement: toReactAriaPlacement(placementProp),
+    offset,
+    crossOffset,
+    shouldFlip,
+    containerPadding,
+  });
+
   const onMenuAction = (menuCloseOnSelect?: boolean) => {
     if (menuCloseOnSelect !== undefined && !menuCloseOnSelect) {
       return;
@@ -146,7 +164,7 @@ export function useDropdown(props: UseDropdownProps) {
 
     return {
       state,
-      placement,
+      placement: placement || DEFAULT_PLACEMENT,
       ref: popoverRef,
       disableAnimation,
       shouldBlockScroll,
@@ -164,18 +182,12 @@ export function useDropdown(props: UseDropdownProps) {
     };
   };
 
-  const getMenuTriggerProps: PropGetter = (
-    originalProps = {},
-    _ref: Ref<any> | null | undefined = null,
-  ) => {
+  const getMenuTriggerProps: PropGetter = (originalProps = {}) => {
     // These props are not needed for the menu trigger since it is handled by the popover trigger.
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {onPress, onPressStart, ...otherMenuTriggerProps} = menuTriggerProps;
 
-    return {
-      ...mergeProps(otherMenuTriggerProps, {isDisabled}, originalProps),
-      ref: mergeRefs(_ref, triggerRef),
-    };
+    return mergeProps(otherMenuTriggerProps, {isDisabled}, originalProps);
   };
 
   const getMenuProps = <T extends object>(
@@ -212,4 +224,18 @@ export function useDropdown(props: UseDropdownProps) {
   };
 }
 
-export type UseDropdownReturn = ReturnType<typeof useDropdown>;
+// export type UseDropdownReturn = ReturnType<typeof useDropdown>;
+
+export type UseDropdownReturn = {
+  Component: string | React.ElementType;
+  menuRef: React.RefObject<HTMLUListElement>;
+  menuProps: any;
+  classNames: string;
+  closeOnSelect: boolean;
+  onClose: () => void;
+  autoFocus: any;
+  disableAnimation: boolean;
+  getPopoverProps: PropGetter;
+  getMenuProps: <T extends object>(props?: Partial<MenuProps<T>>, ref?: Ref<any>) => MenuProps;
+  getMenuTriggerProps: (props?: any) => any;
+};

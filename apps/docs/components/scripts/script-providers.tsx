@@ -1,17 +1,10 @@
 import * as React from "react";
-import {Analytics} from "@vercel/analytics/react";
 import Script from "next/script";
 
-import {__PROD__} from "@/utils";
 
 export function ScriptProviders() {
   return (
     <>
-      <Script
-        id="featurebase-sdk"
-        src="https://do.featurebase.app/js/sdk.js"
-        strategy={"beforeInteractive"}
-      />
       <Script
         defer
         data-modal-disclaimer="This is a custom LLM for NextUI with access to all developer docs (nextui.org/docs) and GitHub Issues and PRs (github.com/nextui-org/nextui)."
@@ -23,7 +16,6 @@ export function ScriptProviders() {
         src="https://widget.kapa.ai/kapa-widget.bundle.js"
         strategy="afterInteractive"
       />
-      {__PROD__ && <Analytics />}
     </>
   );
 }

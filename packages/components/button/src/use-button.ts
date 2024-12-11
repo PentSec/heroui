@@ -14,7 +14,7 @@ import {useDOMRef, filterDOMProps} from "@nextui-org/react-utils";
 import {button} from "@nextui-org/theme";
 import {isValidElement, cloneElement, useMemo} from "react";
 import {useAriaButton} from "@nextui-org/use-aria-button";
-import {useHover} from "@react-aria/interactions";
+import {PressEvent, useHover} from "@react-aria/interactions";
 import {SpinnerProps} from "@nextui-org/spinner";
 import {useRipple} from "@nextui-org/ripple";
 
@@ -56,6 +56,7 @@ interface Props extends HTMLNextUIProps<"button"> {
   /**
    * The native button click event handler.
    * use `onPress` instead.
+   * @deprecated
    */
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
@@ -135,22 +136,22 @@ export function useButton(props: UseButtonProps) {
     ],
   );
 
-  const {onClick: onRippleClickHandler, onClear: onClearRipple, ripples} = useRipple();
+  const {onPress: onRipplePressHandler, onClear: onClearRipple, ripples} = useRipple();
 
-  const handleClick = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handlePress = useCallback(
+    (e: PressEvent) => {
       if (disableRipple || isDisabled || disableAnimation) return;
-      domRef.current && onRippleClickHandler(e);
+      domRef.current && onRipplePressHandler(e);
     },
-    [disableRipple, isDisabled, disableAnimation, domRef, onRippleClickHandler],
+    [disableRipple, isDisabled, disableAnimation, domRef, onRipplePressHandler],
   );
 
   const {buttonProps: ariaButtonProps, isPressed} = useAriaButton(
     {
       elementType: as,
       isDisabled,
-      onPress,
-      onClick: chain(onClick, handleClick),
+      onPress: chain(onPress, handlePress),
+      onClick,
       ...otherProps,
     } as AriaButtonProps,
     domRef,
